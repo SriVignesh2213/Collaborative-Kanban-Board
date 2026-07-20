@@ -101,6 +101,9 @@ export const WorkspaceSettings: React.FC = () => {
       await apiClient.delete(`/workspaces/${workspaceId}`);
     },
     onSuccess: () => {
+      queryClient.setQueryData(['workspaces'], (old: Workspace[] | undefined) => 
+        old ? old.filter(w => w.id !== workspaceId) : []
+      );
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       toast('Workspace deleted permanently', 'success');
       navigate('/');

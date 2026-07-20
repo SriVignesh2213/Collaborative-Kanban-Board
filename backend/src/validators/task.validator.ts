@@ -6,7 +6,13 @@ export const createTaskSchema = z.object({
   description: z.string().optional().nullable(),
   priority: z.nativeEnum(Priority).default(Priority.MEDIUM),
   status: z.nativeEnum(TaskStatus).default(TaskStatus.TODO),
-  dueDate: z.string().datetime().optional().nullable(),
+  dueDate: z.string().datetime().optional().nullable().refine((val) => {
+    if (!val) return true;
+    const date = new Date(val);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date >= today;
+  }, { message: 'Due date cannot be in the past' }),
   assigneeId: z.string().uuid('Invalid assignee ID').optional().nullable(),
   labelIds: z.array(z.string().uuid()).optional(),
 });
@@ -16,7 +22,13 @@ export const updateTaskSchema = z.object({
   description: z.string().optional().nullable(),
   priority: z.nativeEnum(Priority).optional(),
   status: z.nativeEnum(TaskStatus).optional(),
-  dueDate: z.string().datetime().optional().nullable(),
+  dueDate: z.string().datetime().optional().nullable().refine((val) => {
+    if (!val) return true;
+    const date = new Date(val);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date >= today;
+  }, { message: 'Due date cannot be in the past' }),
   assigneeId: z.string().uuid('Invalid assignee ID').optional().nullable(),
   labelIds: z.array(z.string().uuid()).optional(),
   isArchived: z.boolean().optional(),

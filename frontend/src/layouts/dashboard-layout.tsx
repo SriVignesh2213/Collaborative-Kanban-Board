@@ -64,11 +64,15 @@ export const DashboardLayout: React.FC = () => {
         e.preventDefault();
         setIsCommandOpen((prev) => !prev);
       }
-      // Ctrl+Shift+K -> Create Task Modal (if on board page)
+      // Ctrl+Shift+K -> Create Task Modal
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         const createBtn = document.getElementById('btn-new-task');
-        if (createBtn) createBtn.click();
+        if (createBtn) {
+          createBtn.click();
+        } else if (workspaceId) {
+          navigate(`/workspaces/${workspaceId}`, { state: { openCreateTask: true } });
+        }
       }
       // Shortcuts Help
       if (e.key === '?') {
@@ -375,8 +379,14 @@ export const DashboardLayout: React.FC = () => {
         onClose={() => setIsCommandOpen(false)}
         onOpenCreateTask={() => {
           setIsCommandOpen(false);
-          const createBtn = document.getElementById('btn-new-task');
-          if (createBtn) createBtn.click();
+          setTimeout(() => {
+            const createBtn = document.getElementById('btn-new-task');
+            if (createBtn) {
+              createBtn.click();
+            } else if (workspaceId) {
+              navigate(`/workspaces/${workspaceId}`, { state: { openCreateTask: true } });
+            }
+          }, 100);
         }}
       />
 

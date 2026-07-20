@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,7 +55,13 @@ const createTaskSchema = z.object({
   status: z.enum(['TODO', 'IN_PROGRESS', 'REVIEW', 'DONE']).default('TODO'),
   assigneeId: z.string().optional().nullable(),
   labelIds: z.array(z.string()).optional(),
-  dueDate: z.string().optional().nullable(),
+  dueDate: z.string().optional().nullable().refine((val) => {
+    if (!val) return true;
+    const date = new Date(val);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return date >= today;
+  }, { message: 'Due date cannot be in the past' }),
 });
 
 type CreateTaskForm = z.infer<typeof createTaskSchema>;
@@ -63,12 +69,23 @@ type CreateTaskForm = z.infer<typeof createTaskSchema>;
 export const WorkspaceDashboard: React.FC = () => {
   const { workspaceId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { broadcastBoardDrag, broadcastBoardChange } = useSocket();
 
   // Load Real-time listeners for this workspace
   useBoardSocket(workspaceId || null);
+
+  // Check for create task navigation intent
+  useEffect(() => {
+    if (location.state?.openCreateTask) {
+      // Clear the state so it doesn't reopen on refresh
+      window.history.replaceState({}, document.title);
+      setSelectedTaskStatus('TODO');
+      setIsCreateOpen(true);
+    }
+  }, [location.state]);
 
   // States
   const [search, setSearch] = useState('');

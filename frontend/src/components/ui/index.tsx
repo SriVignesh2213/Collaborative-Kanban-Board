@@ -1,4 +1,5 @@
 import React, { InputHTMLAttributes, TextareaHTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { createPortal } from 'react-dom';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -93,7 +94,7 @@ interface DialogProps {
 export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children, title, size = 'md' }) => {
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div 
@@ -125,7 +126,8 @@ export const Dialog: React.FC<DialogProps> = ({ isOpen, onClose, children, title
         )}
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

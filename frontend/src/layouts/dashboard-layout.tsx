@@ -541,6 +541,31 @@ export const DashboardLayout: React.FC = () => {
                     # {w.name}
                   </Link>
                 ))}
+                
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <Button
+                    size="sm"
+                    variant="glass"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setIsCreateOpen(true);
+                    }}
+                    className="text-[11px] font-semibold h-9"
+                  >
+                    <Plus className="h-3.5 w-3.5 mr-1" /> New
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="glass"
+                    onClick={() => {
+                      setMobileOpen(false);
+                      setIsJoinOpen(true);
+                    }}
+                    className="text-[11px] font-semibold h-9"
+                  >
+                    <UserPlus className="h-3.5 w-3.5 mr-1" /> Join
+                  </Button>
+                </div>
               </div>
               <div className="space-y-1">
                 {navLinks.map((link) => (

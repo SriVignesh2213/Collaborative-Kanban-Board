@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: kanban-postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgresPassword123
+      POSTGRES_DB: kanban
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d kanban"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kanban-express-api
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://postgres:postgresPassword123@db:5432/kanban?schema=public"
+      JWT_ACCESS_SECRET: "docker_local_secret_access_key_902348"
+      JWT_REFRESH_SECRET: "docker_local_secret_refresh_key_1029348"
+      CLOUDINARY_CLOUD_NAME: "mock_cloud"
+      CLOUDINARY_API_KEY: "mock_key"
+      CLOUDINARY_API_SECRET: "mock_secret"
+      FRONTEND_URL: "http://localhost"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: kanban-nginx-client
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      VITE_API_URL: "http://localhost:5000/api"
+      VITE_SOCKET_URL: "http://localhost:5000"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
